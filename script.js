@@ -3,12 +3,35 @@ const ctx = canvas.getContext("2d")
 
 const size = 30
 
-const snake = [
-    {x:20,y:20},
-    {x:50,y:20}
-]
+const snake = [ {x:270,y:270}, {x:300,y:270} ]
 
-let direction = "right"
+const randomNumber = (min, max) => {
+    return Math.round(Math.random()*(max - min)+min)
+}
+
+const randomPosition = () => {
+    const number = randomNumber(0, canvas.width - size)
+    return Math.round(number/30) * 30
+}
+
+const food = {
+        x:randomPosition(), 
+        y:randomPosition(), 
+        color: "red"
+    }
+
+let direction, loopId
+
+const drawFood = () => {
+
+    const {x,y,color} = food
+
+    ctx.shadowColor = color
+    ctx.shadowBlur = 50
+    ctx.fillStyle = color
+    ctx.fillRect(x,y, size, size)
+    ctx.shadowBlur = 0
+}
 
 const drawSnake = () => {
     ctx.fillStyle = "#ddd"
@@ -22,17 +45,51 @@ const drawSnake = () => {
 }
 
 const moveSnake = () =>{
-    const head = snake[snake.length -1]
+    if (!direction) return
 
-    snake.shift()
+    const head = snake[snake.length -1]
 
     if(direction == "right") {
         snake.push({x: head.x + size, y: head.y})
     }
-}
+    if(direction == "left") {
+        snake.push({x: head.x - size, y: head.y})
+    }
+    if(direction == "down") {
+        snake.push({x: head.x, y: head.y + size})
+    }
+    if(direction == "up") {
+        snake.push({x: head.x, y: head.y - size})
+    }
 
-setInterval(() => {
+    snake.shift()
+}
+const gameLoop = () => {
+    clearInterval(loopId)
+    ctx.clearRect(0,0,600,600)
+
+    drawFood()
     moveSnake()
     drawSnake() 
-}, 300)
 
+    loopId = setInterval(() => {
+        gameLoop()
+    }, 300)
+}
+
+gameLoop()
+
+document.addEventListener("keydown", ({ key }) =>{
+    if (key == "d" && direction != "left"){
+        direction = "right"
+    }
+    if (key == "a" && direction != "right"){
+        direction = "left"
+    }
+    if (key == "w" && direction != "down"){
+        direction = "up"
+    }
+    if (key == "s" && direction != "up"){
+        direction = "down"
+    }
+})
