@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d")
 
 const size = 30
 
-const snake = [ {x:270,y:270}, {x:300,y:270} ]
+let snake = [ {x:270,y:270}]
 
 const randomNumber = (min, max) => {
     return Math.round(Math.random()*(max - min)+min)
@@ -64,6 +64,39 @@ const moveSnake = () =>{
 
     snake.shift()
 }
+
+const chackEat = () => {
+    const head = snake[snake.length -1]
+
+    if (head.x == food.x && head.y == food.y){
+        snake.push(head)
+
+        food.x = randomPosition()
+        food.y = randomPosition()
+    }
+}
+
+const checkCollision = () => {
+    const head = snake[snake.length -1]
+    const canvasLimit = canvas.widht - size
+    const neckIndex = snake.length -2
+    const wallCollision = head.x < 0 || head.x > 570 || head.y < 0 || head.y > 570
+
+    const selfCollision = snake.find((position, index) => {
+        return index < neckIndex && position.x == head.x && position.y == head.y
+    })
+
+    if (wallCollision || selfCollision){
+        gameOver()
+        alert("se fodeu")
+        snake = [ {x:270,y:270}]
+    }
+}
+
+const gameOver = () => {
+    direction = undefined
+}
+
 const gameLoop = () => {
     clearInterval(loopId)
     ctx.clearRect(0,0,600,600)
@@ -71,7 +104,8 @@ const gameLoop = () => {
     drawFood()
     moveSnake()
     drawSnake() 
-
+    chackEat()
+    checkCollision()
     loopId = setInterval(() => {
         gameLoop()
     }, 300)
